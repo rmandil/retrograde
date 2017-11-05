@@ -25,9 +25,9 @@ star_dec = data[:,2]
 star_mag = data[:,3]
 
 #taking every 50th data point to avoid crowdedness 
-minim_ra = star_ra[1::15]
-minim_dec = star_dec[1::15]
-minim_mag = star_mag[1::15]
+minim_ra = star_ra[1::50]
+minim_dec = star_dec[1::50]
+minim_mag = star_mag[1::50]
 
 #3D celestial sphere of stars
 theta_stars = numpy.pi/2 - minim_dec
@@ -40,16 +40,17 @@ for i in range(len(minim_mag)):
  if 0.0 <= minim_mag[i] <=0.1: 
     s[i] = 10
  elif 0.1 < minim_mag[i] and minim_mag[i] <= 0.2:
-    s[i] = .1
+    s[i] = 20
  elif 0.2 < minim_mag[i] and minim_mag[i] <= 0.3:
-    s[i] = .001
+    s[i] = 30
  elif 0.3 < minim_mag[i] and minim_mag[i] <= 0.4:
-    s[i] = .00001
+    s[i] = 40
  elif 0.4 < minim_mag[i] and minim_mag[i] <= 0.5:
-    s[i] = .0000001
+    s[i] = 50
+
 
 #plotting the stars' positions with the appropriate magnitude representation
-plt.scatter(minim_ra, minim_dec, marker='*', c='yellow', s=s, alpha = 0.4)
+plt.scatter(minim_ra, minim_dec, marker='*', c='yellow', s=s)
             
 ax = plt.gca()
 ax.set_xlabel('Declination (rad)', fontsize=12) 
@@ -200,6 +201,7 @@ fig = plt.figure()
 
 ax = fig.add_subplot(111, projection='3d')
 
+#Define the coordinates for the planets whose trajectories you'd like to plot
 X_1=stars_traj[0]
 Y_1=stars_traj[1]
 Z_1=stars_traj[2]
@@ -220,8 +222,11 @@ X_5=jup_traj[0]
 Y_5=jup_traj[1]
 Z_5=jup_traj[2]
 
-
+#Static stellar background plotting
 ax.scatter(X_1,Y_1,Z_1, c='yellow',marker='*', s=s)
+
+# If you want to plot the planets' STATIC trajectories, use the following:
+
 #ax.scatter(X_2,Y_2,Z_2, c='green',marker='o', edgecolors = c_merc)
 #ax.scatter(X_3,Y_3,Z_3, c='red',marker='o', edgecolors = c_ven)
 #ax.scatter(X_4,Y_4,Z_4, c='black',marker='o', edgecolors = c_mars)
@@ -236,35 +241,7 @@ def update_lines(num, dataLines, lines):
         line.set_3d_properties(data[2, num-10:num])
     return lines
 
-# Attaching 3D axis to the figure
-#fig = plt.figure()
-#ax = p3.Axes3D(fig)
-#ax1 = p3.Axes3D(fig)
-#
-#X = list(X_2)
-#Y = list(Y_2)
-#Z = list(Z_2)
-#
-#
-#array1 = numpy.ndarray(shape=(3,87), dtype=float)
-#
-#array1[0] = X
-#array1[1] = Y
-#array1[2] = Z
-#
-#
-##array2 = numpy.ndarray(shape=(3,181), dtype=float)
-#
-##array2[0] = X_s
-##array2[1] = Y_s
-##array2[2] = Z_s
-#
-## Fifty lines of random 3-D lines
-#data = [array1]
-##data2 = [Gen_RandLine(25, 3)]            
-#   
-
-
+# Converting to lists so that it inputs to the animation
 X2 = list(X_2)
 Y2 = list(Y_2)
 Z2 = list(Z_2)
@@ -282,43 +259,35 @@ Y5 = list(Y_5)
 Z5 = list(Z_5)
 
 
-# Mars
+#Mecury
 array1 = numpy.ndarray(shape=(3,876), dtype=float)
 array1[0] = X2
 array1[1] = Y2
 array1[2] = Z2
 
-# Jupiter
+#Venus
 array2 = numpy.ndarray(shape=(3,876), dtype=float)
 array2[0] = X3
 array2[1] = Y3
 array2[2] = Z3
 
-# Mercury
+#Mars
 array3 = numpy.ndarray(shape=(3,876), dtype=float)
 array3[0] = X4
 array3[1] = Y4
 array3[2] = Z4
 
-# Venus
+#Jupiter
 array4 = numpy.ndarray(shape=(3,876), dtype=float)
 array4[0] = X5
 array4[1] = Y5
 array4[2] = Z5
 
    
-# Fifty lines of random 3-D lines
+#Data for the plantets' trajectories you'd like to map
 data = [array1, array2, array3, array4]
-
-# Creating fifty line objects.
-# NOTE: Can't pass empty arrays into 3d version of plot()
 lines = [ax.plot(dat[0, 0:1], dat[1, 0:1], dat[2, 0:1])[0] for dat in data]
-#lines = [ax.plot(dat[0:1], dat[0:1], dat[0:1])[0] for dat in data]
-
         
-#print len(X)
-
-#
 #Setting the axes properties
 ax.set_xlim3d([-1.0, 1.0])
 ax.set_xlabel('X')
@@ -329,9 +298,13 @@ ax.set_ylabel('Y')
 ax.set_zlim3d([-1.0, 1.0])
 ax.set_zlabel('Z')
 
-# Creating the Animation object
-line_ani = animation.FuncAnimation(fig, update_lines, 876, fargs=(data, lines),
-                                   interval=50, blit=False)
-#line_ani.save('sphere.mp4', writer = "ffmpeg")
-ax.set_facecolor('black')
+
+#creating the Animation object
+anim = animation.FuncAnimation(fig, update_lines, 876, fargs=(data, lines),
+                                   interval=10, blit=False)
+                                   
+#ax.set_facecolor('black')
+anim.save('im.mp4', writer="ffmpeg")
+
+
 plt.show()
